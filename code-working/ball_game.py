@@ -1,0 +1,9 @@
+import tkinter as tk 
+import random
+
+WINDOW_WIDTH = 800
+WINDOW_HEIGHT = 600 
+BALL_SIZE = 50 
+SCORE_PER_BALL = 10
+BALL_COLOR = "Blue"
+BALL_INTERVAL = 1000
