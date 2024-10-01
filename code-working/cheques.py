@@ -14,7 +14,6 @@ def add_cheques():
     amount = float(input("Enter cheque amount: "))
     date_str = input("Enter cheque date (yyyy-mm-dd): ")
     
-    # Correcting the date parsing to use strptime instead of strftime
     cheque_date = datetime.datetime.strptime(date_str, "%Y-%m-%d").date() 
     
     cheques.append({
