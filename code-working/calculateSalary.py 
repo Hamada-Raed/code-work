@@ -1,0 +1,75 @@
+def calculate_staff_salary(hours_worked, hourly_rate, holiday_hours, performance_score, 
+                           annual_bonus_rate=0.08, tax_rate_base=0.15, 
+                           insurance_deduction=0.03, night_shift_hours=0):
+    """
+    Calculate the total salary for hospital staff based on their working hours, holiday hours, 
+    performance score, annual bonus, night shift differential, and tax and insurance deductions. 
+    Holiday hours are paid at 1.5x the hourly rate, and overtime hours above 40 are paid at 1.25x. 
+    The annual bonus rate applies to the total earnings, and night shift hours are paid at 1.2x the hourly rate.
+    Tax and insurance deductions are applied based on the total earnings.
+
+    Args:
+    hours_worked (float): The number of regular hours the staff member worked.
+    hourly_rate (float): The hourly rate for the staff member.
+    holiday_hours (float): The number of holiday hours worked.
+    performance_score (float): Performance score of the staff member (0 to 1 scale).
+    annual_bonus_rate (float): Bonus rate applied to total earnings (default is 8%).
+    tax_rate_base (float): Base tax rate applied to total earnings (default is 15%).
+    insurance_deduction (float): Percentage of total earnings deducted for insurance (default is 3%).
+    night_shift_hours (float): The number of hours worked during night shifts.
+
+    Returns:
+    float: The total salary for the staff member after deductions.
+    """
+    # Validate inputs
+    if hours_worked < 0 or holiday_hours < 0 or performance_score < 0 or night_shift_hours < 0:
+        raise ValueError("Hours worked, holiday hours, performance score, and night shift hours must be non-negative.")
+
+    # Calculate regular payment
+    regular_payment = hours_worked * hourly_rate
+
+    # Calculate holiday payment (1.5x hourly rate)
+    holiday_payment = holiday_hours * hourly_rate * 1.5
+
+    # Calculate overtime payment (1.25x hourly rate for hours above 40)
+    overtime_hours = max(0, hours_worked - 40)
+    overtime_payment = overtime_hours * hourly_rate * 1.25
+
+    # Calculate night shift payment (1.2x hourly rate)
+    night_shift_payment = night_shift_hours * hourly_rate * 1.2
+
+    # Calculate total earnings before deductions
+    total_earnings = (regular_payment + holiday_payment + overtime_payment + night_shift_payment)
+
+    # Calculate annual bonus
+    annual_bonus = total_earnings * annual_bonus_rate
+
+    # Update total earnings to include the annual bonus
+    total_earnings += annual_bonus
+
+    # Calculate tax and insurance deductions
+    effective_tax_rate = tax_rate_base - (performance_score * 0.05)
+    tax_deduction = total_earnings * effective_tax_rate
+    insurance_deduction_amount = total_earnings * insurance_deduction
+
+    # Total salary after deductions
+    total_salary = total_earnings - (tax_deduction + insurance_deduction_amount)
+    return total_salary
+
+# Test Cases
+# Test Case 1
+result1 = calculate_staff_salary(50, 30, 8, 0.7, night_shift_hours=10)
+expected1 = 2420.50
+assert abs(result1 - expected1) < 0.01, f"Expected {expected1}, got {result1}"
+
+# Test Case 2
+result2 = calculate_staff_salary(35, 25, 5, 0.8, annual_bonus_rate=0.1)
+expected2 = 1005.13
+assert abs(result2 - expected2) < 0.01, f"Expected {expected2}, got {result2}"
+
+# Test Case 3
+result3 = calculate_staff_salary(40, 20, 0, 0.9, insurance_deduction=0.02)
+expected3 = 756.00
+assert abs(result3 - expected3) < 0.01, f"Expected {expected3}, got {result3}"
+
+print("All test cases passed!")
