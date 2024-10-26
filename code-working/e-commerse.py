@@ -3,25 +3,14 @@
 # from typing import List, Tuple
 
 # def recommend_products(purchase_history: List[Tuple[int, str]], top_n: int = 10) -> List[int]:
-#     """
-#     Recommends the top products based on purchase frequency while applying a decay function 
-#     to avoid over-recommending.
-    
-#     :param purchase_history: List of tuples containing product ID and timestamp.
-#     :param top_n: Number of top products to recommend.
-#     :return: List of recommended product IDs.
-#     """
-#     # Prepare data
 #     purchases_within_month = defaultdict(list)
 #     thirty_days_ago = datetime.datetime.now() - datetime.timedelta(days=30)
 
-#     # Convert timestamps and filter purchases made within the last 30 days
 #     for product_id, timestamp in purchase_history:
 #         time_obj = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
 #         if time_obj >= thirty_days_ago:
 #             purchases_within_month[product_id].append(time_obj)
 
-#     # Count frequency while applying a decay based on how many times a single product is repeatedly purchased
 #     product_weights = {}
 #     decay_factor = 0.9
 
@@ -67,70 +56,49 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 import numpy as np
 
+
 class ProductRecommender:
     def __init__(self, decay_rate=0.1, top_n=10):
-        """Initialize decay rate, top N recommendations, and tracking dictionaries."""
         self.decay_rate = decay_rate
         self.top_n = top_n
-        self.product_freq = defaultdict(int)  # Tracks overall product frequency
-        self.user_product_history = defaultdict(list)  # Tracks each user's purchase history
+        self.product_freq = defaultdict(int)  
+        self.user_product_history = defaultdict(list)  
 
     def update_purchases(self, purchases):
-        """
-        Updates product frequency and user purchase history for recent purchases.
         
-        Args:
-        - purchases (list): List of purchases with customer ID, product ID, and timestamp.
-        """
-        time_threshold = datetime.now() - timedelta(days=30)  # Last 30 days only
+        time_threshold = datetime.now() - timedelta(days=30) 
         for purchase in purchases:
             customer_id = purchase['customer_id']
             product_id = purchase['product_id']
             timestamp = purchase['timestamp']
             
-            # Only add purchase if within 30-day window
             if timestamp >= time_threshold:
                 self.product_freq[product_id] += 1
                 self.user_product_history[customer_id].append((product_id, timestamp))
 
     def apply_decay(self):
-        """
-        Applies decay to reduce weight for frequently bought items by a single user.
-        
-        Returns:
-        - Decayed product frequency.
-        """
-        time_threshold = datetime.now() - timedelta(days=30)  # Last 30 days only
+        time_threshold = datetime.now() - timedelta(days=30)  
         decayed_product_freq = defaultdict(int)
         
         for customer_id, history in self.user_product_history.items():
             product_count = defaultdict(int)
             
-            # Count purchases for each product in the time frame
             for product_id, timestamp in history:
                 if timestamp >= time_threshold:
                     product_count[product_id] += 1
 
-            # Apply decay for each product in user's purchase history
             for product_id, count in product_count.items():
-                decay_factor = np.exp(-self.decay_rate * count)  # Exponential decay
+                decay_factor = np.exp(-self.decay_rate * count)  
                 decayed_product_freq[product_id] += decay_factor * self.product_freq[product_id]
 
         return decayed_product_freq
 
     def get_top_recommendations(self):
-        """
-        Returns top N products based on decayed product frequency.
         
-        Returns:
-        - List of top recommended products.
-        """
         decayed_product_freq = self.apply_decay()
-        # Sort products by frequency and return the top N
         top_recommendations = sorted(decayed_product_freq.items(), key=lambda x: x[1], reverse=True)[:self.top_n]
         return top_recommendations
 
-# Example usage
 purchases = [
     {'customer_id': 1, 'product_id': 'A', 'timestamp': datetime.now() - timedelta(days=30)},
     {'customer_id': 1, 'product_id': 'B', 'timestamp': datetime.now() - timedelta(days=20)},
@@ -140,7 +108,6 @@ purchases = [
     {'customer_id': 3, 'product_id': 'A', 'timestamp': datetime.now() - timedelta(days=5)},
 ]
 
-# Instantiate and populate recommender with purchase data
 recommender = ProductRecommender(decay_rate=0.1, top_n=10)
 recommender.update_purchases(purchases)
 top_recommendations = recommender.get_top_recommendations()

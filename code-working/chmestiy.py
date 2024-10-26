@@ -1,14 +1,10 @@
-# Define a function to add a chemical to the inventory
 def add_chemical(inventory, name, quantity, concentration):
     if name in inventory:
-        # Update the existing chemical's quantity
         inventory[name]['quantity'] += quantity
     else:
-        # Add a new chemical to the inventory
         inventory[name] = {'quantity': quantity, 'concentration': concentration}
     return inventory
 
-# Define a function to remove a chemical from the inventory
 def remove_chemical(inventory, name, quantity):
     if name not in inventory:
         print(f"Error: {name} not found in inventory.")
@@ -18,10 +14,8 @@ def remove_chemical(inventory, name, quantity):
         print(f"Error: Cannot remove {quantity} liters of {name}. Only {inventory[name]['quantity']} liters available.")
         return inventory
 
-    # Subtract the specified quantity
     inventory[name]['quantity'] -= quantity
 
-    # Remove the chemical if its quantity reaches zero
     if inventory[name]['quantity'] == 0:
         del inventory[name]
 

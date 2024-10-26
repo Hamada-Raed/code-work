@@ -5,13 +5,11 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 
-# Configure the database and JWT
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///banking_system.db'
 app.config['JWT_SECRET_KEY'] = "8f4e585bcd364f0c9d6eb5dff67f5a4ea780bb77dd75de6042c835d9600fd1bf"  
 db = SQLAlchemy(app)
 jwt = JWTManager(app)
 
-# User model
 class User(db.Model): 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -20,7 +18,6 @@ class User(db.Model):
     address = db.Column(db.String(200))
     account_balance = db.Column(db.Float, default=0.0)
 
-# Transaction model
 class Transaction(db.Model): 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -28,14 +25,13 @@ class Transaction(db.Model):
     amount = db.Column(db.Float, nullable=False)
     timestamp = db.Column(db.DateTime, default=db.func.current_timestamp())
 
-# Welcome route
 @app.route("/")
 def welcome():
-    return '''
+    return 
+    '''
         <h1>WELCOME</h1>
     '''
 
-# Registration route
 @app.route('/register', methods=["POST"])
 def register():
     data = request.json
@@ -45,7 +41,6 @@ def register():
     db.session.commit()
     return jsonify({'message': "User registered successfully!"}), 201 
 
-# Login route
 @app.route('/login', methods=["POST"])
 def login():
     data = request.json
@@ -55,7 +50,6 @@ def login():
         return jsonify({'access_token': access_token}) 
     return jsonify({'message': 'Invalid credentials!'}), 401
 
-# Deposit route
 @app.route('/deposit', methods=["POST"])
 @jwt_required()
 def deposit():
@@ -67,7 +61,6 @@ def deposit():
     db.session.commit()
     return jsonify({'message': "Deposit successful!", "new_balance": user.account_balance})
 
-# Withdraw route
 @app.route('/withdraw', methods=["POST"])
 @jwt_required()
 def withdraw():
@@ -81,7 +74,6 @@ def withdraw():
         return jsonify({'message': "Withdraw successful!", "new_balance": user.account_balance})
     return jsonify({"message": "Insufficient funds"}), 400 
 
-# Get transactions route
 @app.route('/transactions', methods=["POST"])
 @jwt_required()
 def get_transactions():
