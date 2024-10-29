@@ -1,0 +1,22 @@
+#grid {
+    display: grid;
+    grid-template-columns: repeat(4, 100px);
+    grid-template-rows: repeat(4, 100px);
+    border: 1px solid black;
+}
+
+.machine {
+    background-color: green;
+}
+
+.machine.off {
+    background-color: red;
+}
+
+.empty {
+    background-color: white;
+}
+
+#totalLoad {
+    color: green;
+}

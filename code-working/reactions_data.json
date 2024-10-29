@@ -1,0 +1,19 @@
+{
+  "reactions": [
+    {
+      "name": "H",
+      "equilibriumConstant": 0.4,
+      "reactantConcentration": [
+        0.8
+      ]
+    },
+    {
+      "name": "G",
+      "equilibriumConstant": 0.3,
+      "reactantConcentration": [
+        0.7
+      ]
+    }
+  ],
+  "combinedEquilibriumConstant": 0.20683921047805245
+}

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hand Detection Screenshot</title>
+    <style>
+        #video {
+            display: block;
+            width: 100%;
+            max-width: 640px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Show Your Hand to Take a Screenshot</h1>
+    <video id="video" autoplay></video>
+    <button id="screenshotButton" style="display: none;">Taking Screenshot...</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/handpose"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <script>
+        const video = document.getElementById('video');
+        const screenshotButton = document.getElementById('screenshotButton');
+
+        let model;
+        let screenshotTaken = false;
+
+        async function loadModel() {
+            model = await handpose.load();
+            console.log("Model loaded");
+        }
+
+        async function startVideo() {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            video.srcObject = stream;
+        }
+
+        async function detectHand() {
+            if (!model) return;
+            const predictions = await model.estimateHands(video);
+
+            if (predictions.length > 0 && !screenshotTaken) {
+                const landmarks = predictions[0].landmarks;
+                const fingerCount = landmarks.filter((point) => point[1] < video.videoHeight / 2).length;
+
+                // Check if five fingers are up
+                if (fingerCount >= 5) {
+                    console.log("Hand with five fingers detected");
+                    screenshotTaken = true;  // Prevent multiple triggers
+                    screenshotButton.style.display = 'block'; // Show the button
+                    setTimeout(takeScreenshot, 3000); // Delay of 3 seconds before taking a screenshot
+                }
+            }
+            requestAnimationFrame(detectHand);
+        }
+
+        async function takeScreenshot() {
+            screenshotButton.innerText = "Taking Screenshot...";
+            screenshotButton.disabled = true; // Disable the button
+
+            // Use html2canvas to take a screenshot of the video element
+            html2canvas(video).then(canvas => {
+                const screenshot = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.href = screenshot;
+                link.download = 'screenshot.png';
+                link.click();
+                console.log("Screenshot taken and downloaded");
+
+                // Reset the state for next detection
+                screenshotTaken = false;
+                screenshotButton.innerText = "Show Your Hand to Take a Screenshot"; // Reset button text
+                screenshotButton.disabled = false; // Enable the button again
+                screenshotButton.style.display = 'none'; // Hide the button
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadModel();
+            await startVideo();
+            detectHand();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Complex Gambling Game</title>
+<style>
+    body { font-family: Arial, sans-serif; background-color: #2a2a2a; color: #eee; }
+    #game { display: flex; flex-direction: column; align-items: center; margin-top: 20px; }
+    .log { background: #444; padding: 10px; margin-top: 10px; width: 400px; height: 150px; overflow-y: scroll; }
+    .btn { margin: 5px; padding: 8px 12px; background-color: #0066cc; color: white; border: none; cursor: pointer; }
+    .btn:disabled { background-color: #555; cursor: not-allowed; }
+    #betOptions { margin: 10px; display: flex; flex-direction: column; align-items: center; }
+</style>
+</head>
+<body>
+<div id="game">
+<h1>Gambling Game</h1>
+<p>Your Score: <span id="score">100</span> points | Level: <span id="level">1</span></p>
+<button class="btn" onclick="claimDailyBonus()">Claim Daily Bonus</button>
+<!-- Game Options -->
+<div id="gameOptions">
+<h3>Select a Game</h3>
+<button class="btn" onclick="chooseGame('roulette')">Roulette</button>
+<button class="btn" onclick="chooseGame('slots')">Slot Machine</button>
+<button class="btn" onclick="chooseGame('dice')">Dice Roll</button>
+</div>
+ 
+    <!-- Bet Options -->
+<div id="betOptions" style="display: none;">
+<p id="betPrompt"></p>
+<input type="number" id="betValue" placeholder="Enter your choice" />
+<input type="number" id="wager" placeholder="Enter wager" />
+<button class="btn" onclick="placeBet()">Place Bet</button>
+</div>
+ 
+    <!-- Game Log -->
+<div class="log" id="log">Game Log</div>
+</div>
+ 
+  <script>
+    let score = 100;
+    let level = 1;
+    let dailyBonusClaimed = false;
+    let selectedGame = '';
+    const logElement = document.getElementById('log');
+    const scoreElement = document.getElementById('score');
+    const levelElement = document.getElementById('level');
+ 
+    function log(message) {
+      logElement.innerHTML += `<p>${message}</p>`;
+      logElement.scrollTop = logElement.scrollHeight;
+    }
+ 
+    function claimDailyBonus() {
+      if (!dailyBonusClaimed) {
+        const bonus = 20 * level;
+        score += bonus;
+        scoreElement.innerText = score;
+        dailyBonusClaimed = true;
+        log(`Daily bonus claimed! You received ${bonus} points.`);
+      } else {
+        log("You've already claimed your daily bonus today.");
+      }
+    }
+ 
+    function chooseGame(gameType) {
+      selectedGame = gameType;
+      document.getElementById('betOptions').style.display = 'block';
+      document.getElementById('betPrompt').innerText = getBetPrompt(gameType);
+    }
+ 
+    function getBetPrompt(gameType) {
+      switch (gameType) {
+        case 'roulette': return "Roulette: Enter 'red'/'black' or a number (1-10):";
+        case 'slots': return "Slots: Enter any number between 1 and 3 (3 for jackpot):";
+        case 'dice': return "Dice: Enter a number between 1 and 6:";
+        default: return "Choose a valid game.";
+      }
+    }
+ 
+    function placeBet() {
+      const betValue = document.getElementById('betValue').value;
+      const wager = parseInt(document.getElementById('wager').value, 10);
+ 
+      if (wager > score) {
+        log("Not enough points to place this bet!");
+        return;
+      }
+ 
+      if (!betValue || !wager || wager <= 0) {
+        log('Invalid bet or wager.');
+        return;
+      }
+ 
+      score -= wager;
+      scoreElement.innerText = score;
+      log(`You placed a ${selectedGame} bet with ${wager} points.`);
+      playGame(selectedGame, betValue, wager);
+    }
+ 
+    function playGame(gameType, betValue, wager) {
+      let winnings = 0;
+      let outcome = '';
+ 
+      switch (gameType) {
+        case 'roulette':
+          const rouletteResult = Math.floor(Math.random() * 10) + 1;
+          const colorResult = rouletteResult % 2 === 0 ? 'black' : 'red';
+          log(`Roulette spin result: ${colorResult} ${rouletteResult}`);
+          if (betValue.toLowerCase() === colorResult || parseInt(betValue) === rouletteResult) {
+            winnings = wager * (parseInt(betValue) === rouletteResult ? 10 : 1.5);
+          }
+          break;
+ 
+        case 'slots':
+          const slotResult = Math.floor(Math.random() * 3) + 1;
+          log(`Slot machine result: ${slotResult}`);
+          if (parseInt(betValue) === slotResult) {
+            winnings = wager * (slotResult === 3 ? 15 : 2);
+          }
+          break;
+ 
+        case 'dice':
+          const diceResult = Math.floor(Math.random() * 6) + 1;
+          log(`Dice roll result: ${diceResult}`);
+          if (parseInt(betValue) === diceResult) {
+            winnings = wager * 6;
+          }
+          break;
+ 
+        default:
+          log("Invalid game selected.");
+          return;
+      }
+ 
+      if (winnings > 0) {
+        score += winnings;
+        scoreElement.innerText = score;
+        log(`Congratulations! You won ${winnings} points.`);
+      } else {
+        log("Sorry, you lost this round.");
+      }
+ 
+      checkLevelUp();
+      checkGameOver();
+    }
+ 
+    function checkLevelUp() {
+      if (score >= level * 100) {
+        level++;
+        levelElement.innerText = level;
+        log(`Level up! You've reached level ${level}.`);
+      }
+    }
+ 
+    function checkGameOver() {
+      if (score <= 0) {
+        log("Game over! No points left.");
+        document.getElementById('gameOptions').style.display = 'none';
+        document.getElementById('betOptions').style.display = 'none';
+      }
+    }
+ 
+    log("Welcome to the Complex Gambling Game! Choose a game to get started.");
+</script>
+</body>
+</html>
